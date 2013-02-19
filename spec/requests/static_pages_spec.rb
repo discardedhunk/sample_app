@@ -19,9 +19,10 @@ describe "Static pages" do
 
     describe "for signed-in users" do
       let(:user) { FactoryGirl.create(:user) }
+      let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum") }
+      let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet") }
+
       before do
-        FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
-        FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
         sign_in user
         visit root_path
       end
@@ -29,6 +30,18 @@ describe "Static pages" do
       it "should render the user's feed" do
         user.feed.each do |item|
           page.should have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "side bar" do
+        it "should should render the user's micropost count" do
+          page.should have_content(user.microposts.count)
+          page.should have_content("2 microposts")
+        end
+        it "should singularize microposts if there's only one" do
+          delete micropost_path(m2)
+          visit root_path
+          page.should have_content("1 micropost")
         end
       end
     end
