@@ -94,6 +94,25 @@ describe "User pages" do
     end
   end
 
+  describe "other user's profile page" do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:user2) { FactoryGirl.create(:user) }
+    let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
+    before do
+      sign_in user2
+      visit user_path(user)
+    end
+
+    it { should have_content(user.name) }
+
+    describe "microposts" do
+      it { should have_content(user.microposts.count) }
+      it { should_not have_link('delete') }
+    end
+  end
+
   describe "signup" do
 
     before { visit signup_path }
